@@ -1,0 +1,56 @@
+DROP TABLE IF EXISTS mwmarketdata.instrument.stocks_instrument_reference;
+CREATE TABLE IF NOT EXISTS mwmarketdata.instrument.stocks_instrument_reference
+(
+  exchange_id       VARCHAR(100),
+  instrument_id     VARCHAR(100),
+  type              integer,
+  status            integer,
+  name              VARCHAR(255),
+  pre_close_price   decimal(20, 3),
+  upper_limit_price decimal(20, 3),
+  lower_limit_price decimal(20, 3),
+  update_time       timestamp,
+  trading_day       char(20)
+);
+DROP TABLE IF EXISTS mwmarketdata.instrument.futures_instrument_reference;
+CREATE TABLE IF NOT EXISTS mwmarketdata.instrument.futures_instrument_reference
+(
+  security_id            varchar(255),
+  exchange_id            varchar(255),
+  code_id                varchar(255),
+  full_name              varchar(255),
+  name                   varchar(255),
+  ename                  varchar(255),
+  underlying_security_id varchar(255),
+  t_uint                 varchar(255),
+  p_uint                 varchar(255),
+  fs_p_uint              varchar(255),
+  mf_price               varchar(255),
+  ft_margins             varchar(255),
+  ce_multiplier          varchar(255),
+  pre_settle_price       varchar(255),
+  up_limit_price         varchar(255),
+  down_limit_price       varchar(255),
+  rtd                    varchar(255),
+  type_code              varchar(255),
+  security_type          varchar(255),
+  cc_type                varchar(255),
+  list_date              varchar(255),
+  delist_date            varchar(255),
+  dl_month               varchar(255),
+  l_price                varchar(255),
+  l_tdl_date             varchar(255),
+  c_months_desc          varchar(255),
+  t_hours_desc           varchar(255),
+  lt_dated_desc          varchar(255),
+  d_data_desc            varchar(255),
+  dmean_desc             varchar(255),
+  dsite_desc             varchar(255),
+  lt_date_hour_desc      varchar(255),
+  contract_value_desc    varchar(255),
+  max_price_fluct_desc   varchar(255),
+  post_limit_desc        varchar(255),
+  source_type            varchar(255),
+  update_time            timestamp,
+  trading_day            CHAR
+);

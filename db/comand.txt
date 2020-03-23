@@ -1,0 +1,1 @@
+python -m pwiz -e postgresql -Hmowentech.cn -p50000 -ufwang -P wang123 -s instrument  mwmarketdata>models.py
