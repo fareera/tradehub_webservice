@@ -1,3 +1,2 @@
-temporary_assugnments_dict = dict(zip([], []))
-print(temporary_assugnments_dict)
-print("adasda.xls".endswith(".xls"))
+a = "201002030809"
+print(a[0:8])

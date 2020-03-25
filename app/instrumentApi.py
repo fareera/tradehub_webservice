@@ -13,6 +13,7 @@ import time
 from aiohttp import web
 
 from db.models import FuturesInstrumentReference, StocksInstrumentReference
+from utils.get_table_class import createCandlelinePeeweeClass
 from utils.makeresp import make_resp
 
 # -----------------------------------------------------------------------------
@@ -25,41 +26,6 @@ instrumentapiroutes = web.RouteTableDef()
 # Functions
 # -----------------------------------------------------------------------------
 # 获取合约列表
-# data = [
-#         {
-#             "exchange_id": "SH",
-#             "id": "600570",
-#             "type": 1,
-#             "status": 0,
-#             "name": "恒生电子",
-#             "pre_close_price": 100.83,
-#             "upper_limit_price": 110.91,
-#             "lower_limit_price": 90.75,
-#             "update_time": "2020-03-06 08:34:03"
-#         },
-#         {
-#             "exchange_id": "SZ",
-#             "id": "002156",
-#             "type": 1,
-#             "status": 0,
-#             "name": "木林森",
-#             "pre_close_price": 25.33,
-#             "upper_limit_price": 27.86,
-#             "lower_limit_price": 22.80,
-#             "update_time": "2020-03-06 08:34:03"
-#         },
-#         {
-#             "exchange_id": "SHFE",
-#             "id": "ZN2005",
-#             "type": 2,
-#             "status": 0,
-#             "name": "沪锌2005",
-#             "pre_close_price": 16095,
-#             "pre_settlement_price": 16050,
-#             "upper_limit_price": 16850,
-#             "lower_limit_price": 15245,
-#             "update_time": "2020-03-06 08:34:03"
-#         },
 #         {
 #             "exchange_id": "CFFEX",
 #             "id": "IF2003",
@@ -72,7 +38,6 @@ instrumentapiroutes = web.RouteTableDef()
 #             "lower_limit_price": 3775.2,
 #             "update_time": "2020-03-06 08:34:03"
 #         }
-#     ]
 @instrumentapiroutes.get('/instrument')
 async def acquire_instrument_list(request):
     reader = await request.read()
@@ -94,15 +59,16 @@ async def acquire_instrument_reference_info(request):
         symbol_split = symbol.split(".")
         instrument_id = symbol_split[0].lower()
         exchange_id = symbol_split[1].lower()
+        print(instrument_id,exchange_id)
         futures_query_res = FuturesInstrumentReference.select().where(
             (FuturesInstrumentReference.security_id == instrument_id) &
             (FuturesInstrumentReference.exchange_id == exchange_id) &
-            (FuturesInstrumentReference.trading_day == time.strftime("%Y%m%d", time.localtime(time.time())))
+            (FuturesInstrumentReference.trading_day == str(time.strftime("%Y%m%d", time.localtime(time.time()))))
         ).dicts()
         stock_query_res = StocksInstrumentReference.select().where(
             (StocksInstrumentReference.instrument_id == instrument_id) &
             (StocksInstrumentReference.exchange_id == exchange_id) &
-            (StocksInstrumentReference.trading_day == time.strftime("%Y%m%d", time.localtime(time.time())))
+            (StocksInstrumentReference.trading_day == str(time.strftime("%Y%m%d", time.localtime(time.time()))))
         ).dicts()
         for vf in futures_query_res:
             content_list.append(vf)
@@ -205,7 +171,28 @@ async def acquire_instrument_quote_snapshot(request):
 async def acquire_instrument_candleline(request):
     reader = await request.read()
     reader = json.loads(reader)
-    symbol_list = reader["symbol_list"]
+    filter_list = reader["filter"]
+    content_dict = {}
+    for filter in filter_list:
+        content_list = []
+        symbol_split = filter["symbol_id"].split(".")
+        instrument_id = symbol_split[0].lower()
+        exchange_id = symbol_split[1].lower()
+        try:
+            table_cls = createCandlelinePeeweeClass(f"{exchange_id}{instrument_id}")
+            query_res = table_cls.select().where(
+                (table_cls.tradedate>=int(filter["start_time"]))&
+                (table_cls.tradedate<=int(filter["stop_time"]))&
+                (table_cls.period == filter["period"])
+            ).order_by(table_cls.tradedate).limit(filter["count"]).dicts()
+            content_list = [i for i in query_res]
+            content_dict[filter["symbol_id"]] = content_list
+        except:
+            pass
+    return make_resp(content=content_dict)
+
+
+
 
 # -----------------------------------------------------------------------------
 # Classes

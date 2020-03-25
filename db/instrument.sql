@@ -52,5 +52,5 @@ CREATE TABLE IF NOT EXISTS mwmarketdata.instrument.futures_instrument_reference
   post_limit_desc        varchar(255),
   source_type            varchar(255),
   update_time            timestamp,
-  trading_day            CHAR
+  trading_day            varchar(20)
 );
